@@ -4,19 +4,73 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#48609B"
+    android:backgroundTint="@color/appMainColor"
     tools:context=".ui.notifications.NotificationsFragment">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="450dp"
+        android:layout_height="450dp"
+        android:backgroundTint="@color/appMainColor"
+        android:scaleType="fitXY"
+        android:src="@drawable/clock_background"
+        app:layout_constraintBottom_toBottomOf="@+id/customAnalogClock"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/customAnalogClock" />
+
+    <com.example.khulazy.CustomAnalogClock
+        android:id="@+id/customAnalogClock"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="28dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/text_notifications"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="50dp"
         android:layout_marginEnd="8dp"
-        android:textAlignment="center"
+        android:fontFamily="@font/poppinssemibold"
+        android:text="  Alarms"
+        android:textAlignment="textStart"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/customAnalogClock" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/appMainColor"
+        android:elevation="10dp"
+        android:text="● ● ●"
+        android:textColor="#FE696969"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="@+id/text_notifications"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.948"
+        app:layout_constraintStart_toStartOf="@+id/text_notifications"
+        app:layout_constraintTop_toTopOf="@+id/text_notifications" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="409dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:background="@color/appMainColor"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/text_notifications" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
