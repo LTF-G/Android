@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.khulazy.MainActivity;
 import com.example.khulazy.R;
 
 import java.io.ObjectInputStream;
@@ -28,6 +29,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     String response; //서버 응답
     String TAG = "socket 응답";
+//    Handler handler = new Handler();
 
     class SocketThread extends Thread{
         String host; // 서버 IP
@@ -50,6 +52,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                 ObjectInputStream instream = new ObjectInputStream(socket.getInputStream()); // 소켓의 입력 스트림 참조
                 response = (String) instream.readObject(); // 응답 가져오기
                 Log.d(TAG, "response: " + response);
+
+//                handler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Toast.makeText((MainActivity)getActivity(), "서버 응답 : " + response, Toast.LENGTH_LONG).show();
+//                    }
+//                });
 
                 socket.close(); // 소켓 해제
 
