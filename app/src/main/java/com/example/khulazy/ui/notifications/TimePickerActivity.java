@@ -35,7 +35,6 @@ public class TimePickerActivity extends Fragment implements View.OnClickListener
         return view;
     }
 
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -44,5 +43,4 @@ public class TimePickerActivity extends Fragment implements View.OnClickListener
                 break;
         }
     }
-
 }

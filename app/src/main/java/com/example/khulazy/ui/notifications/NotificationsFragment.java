@@ -26,9 +26,7 @@ import java.util.ArrayList;
 public class NotificationsFragment extends Fragment implements View.OnClickListener {
 
     private View view;
-    private View alarmview;
     private Button button;
-    private Switch toggle;
 
     private int hour;
     private int minute;

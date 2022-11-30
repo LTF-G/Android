@@ -47,52 +47,31 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         String host; // 서버 IP
         String data; // 전송 데이터
         String rpi; // 라즈베리 파이 ip
+        int port;
 
         public SocketThread(String host, String data){
             this.host = host;
             this.data = data;
-            this.rpi = "127.0.0.1";
+            this.rpi = "192.168.107.161";
+            this.port = 8888;
         }
 
         @Override
         public void run() {
-            try{
-                int port = 5555; //포트 번호는 서버측과 똑같이
-
+            try {
                 int SDK_INT = android.os.Build.VERSION.SDK_INT;
                 if (SDK_INT > 8){
                     StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                     StrictMode.setThreadPolicy(policy);
                 }
-
-                rpi = httpConnection.GETFunction(this.host);
+                //rpi = httpConnection.GETFunction(this.host);
                 Socket socket = new Socket(rpi, port); // 소켓 열어주기
 
-                ObjectOutputStream outstream = new ObjectOutputStream(socket.getOutputStream()); //소켓의 출력 스트림 참조
-                outstream.writeObject(data); // 출력 스트림에 데이터 넣기
-                outstream.flush(); // 출력
-
-                String OutData = "AT+START\n";
+                String OutData = data;
                 byte[] data = OutData.getBytes();
                 OutputStream output = socket.getOutputStream();
                 output.write(data);
-
-                Log.d(TAG, "데이터 보냄");
-
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Toast.makeText(mContext.getApplicationContext(), "소켓 연결됨", Toast.LENGTH_LONG).show();
-//                    }
-//                });
-
-//                while (true) {
-//                    byte[] buffer = new byte[1024];
-//                    InputStream input = socket.getInputStream();
-//                    int bytes = input.read(buffer);
-//
-//                    Log.d(TAG, "byte = " + bytes);
-//                }
+                Log.d(TAG, "데이터 보냄" + data);
 
                 while(true) {
                     ObjectInputStream instream = new ObjectInputStream(socket.getInputStream()); // 소켓의 입력 스트림 참조
@@ -103,13 +82,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                         break;
                     }
                 }
-//                handler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Toast.makeText((MainActivity)getActivity(), "서버 응답 : " + response, Toast.LENGTH_LONG).show();
-//                    }
-//                });
 
+                Log.d(TAG, "소켓 닫음");
                 socket.close(); // 소켓 해제
 
             }catch(Exception e){
@@ -120,7 +94,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     private ArrayList<TimeActivity> listbundle = new ArrayList<>();
     Context mContext;
-
 
     public RecyclerAdapter(ArrayList<TimeActivity> bundle) {
         this.listbundle = bundle;
@@ -136,14 +109,18 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         ViewHolder holder = new ViewHolder(view);
 
         Switch toggle = view.findViewById(R.id.alarm_toggle);
+        TextView time = view.findViewById(R.id.time);
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
                 if (checked) {
                     Toast.makeText(mContext, "알람을 설정했습니다.", Toast.LENGTH_SHORT).show();
-                    SocketThread thread = new SocketThread("https://43.201.130.48:8484/connection", "set");
+                    Log.d(TAG, "data: " + time.getText().toString());
+                    String str = "15:15/20:15";
+                    SocketThread thread = new SocketThread("https://43.201.130.48:8484/connection", str);
                     thread.start();
                 }
+
                 else {
                     Toast.makeText(mContext, "알람을 해제했습니다.", Toast.LENGTH_SHORT).show();
                     SocketThread thread = new SocketThread("https://43.201.130.48:8484/connection", "cancel");

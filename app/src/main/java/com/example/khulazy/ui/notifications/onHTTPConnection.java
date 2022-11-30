@@ -21,14 +21,13 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 public class onHTTPConnection {
-
     String EXCEPTION_ERROR = "url 오류 발생";
 
     public String GETFunction(String mUrl) {
         try {
             URL url = new URL(mUrl);
             ignoreSsl();
-            
+
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFzZCIsImlhdCI6MTY2OTQ5MDg5MCwiZXhwIjoxNjY5NDk4MDkwfQ.TjmeuMwEcnY7str3L2DyEt3QTD6ZSKTK5mBa5Eqxc7Q");
