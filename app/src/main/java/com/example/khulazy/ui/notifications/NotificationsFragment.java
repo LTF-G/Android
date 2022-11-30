@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +26,9 @@ import java.util.ArrayList;
 public class NotificationsFragment extends Fragment implements View.OnClickListener {
 
     private View view;
+    private View alarmview;
     private Button button;
+    private Switch toggle;
 
     private int hour;
     private int minute;
@@ -42,10 +46,9 @@ public class NotificationsFragment extends Fragment implements View.OnClickListe
             hour = getArguments().getInt("hour");
             minute = getArguments().getInt("minute");
 
-            Toast.makeText(getActivity().getApplicationContext(), hour+" "+minute, Toast.LENGTH_SHORT).show();
-
             TimeActivity t = new TimeActivity(hour, minute);
             listbundle.add(t);
+            adapter.notifyDataSetChanged();
         }
         view = inflater.inflate(R.layout.fragment_notifications, container, false);
 
