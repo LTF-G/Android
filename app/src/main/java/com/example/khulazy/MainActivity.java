@@ -2,34 +2,22 @@ package com.example.khulazy;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
-
 import com.example.khulazy.ui.dashboard.DashboardFragment;
 import com.example.khulazy.ui.home.HomeFragment;
 import com.example.khulazy.ui.notifications.NotificationsFragment;
+import com.example.khulazy.ui.notifications.TimePickerActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.navigation.NavigationBarView;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     Fragment home;
     Fragment dashboard;
     Fragment noti;
+    Fragment timepicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,9 +42,10 @@ public class MainActivity extends AppCompatActivity {
         home = new HomeFragment();
         dashboard = new DashboardFragment();
         noti = new NotificationsFragment();
+        timepicker = new TimePickerActivity();
 
         // 초기 플래그먼트 설정
-        getSupportFragmentManager().beginTransaction().replace(R.id.layout_main, dashboard).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.layout_main, home).commit();
 
 
         // 바텀 네비게이션
@@ -99,125 +89,23 @@ public class MainActivity extends AppCompatActivity {
         ClientThread clientThread=new ClientThread(serverip, myHandler);
         clientThread.start();
     }
-}
 
-class ClientThread extends Thread{
-    private String serveradd;
-    private Handler mHandler;
+    public void replaceFragment(int index, int hour, int minute) {
+        switch(index) {
+            case 1:
+                Log.d(TAG, "replaceFragment: 화면 전환 1");
+                getSupportFragmentManager().beginTransaction().replace(R.id.layout_main, timepicker).commit();
+                break;
+            case 2:
+                Log.d(TAG, "replaceFragment: 화면 전환 2");
 
-    public ClientThread(String str, Handler handler){
-        serveradd=str;
-        mHandler=handler;
-    }
+                Bundle bundle = new Bundle();
+                bundle.putInt("hour", hour);
+                bundle.putInt("minute", minute);
+                noti.setArguments(bundle);
 
-    @Override
-    public void run() {
-        Log.d("testing","ClientThread run");
-
-        Socket sock=null;
-        try{
-            sock=new Socket(serveradd,9000);
-            println(">> 서버와 연결 성공!");
-            SendThread sendThread=new SendThread(this, sock.getOutputStream());
-            RecvThread recvThread=new RecvThread(this,sock.getInputStream());
-            sendThread.start();
-            recvThread.start();
-            sendThread.join();
-            recvThread.join();
-        }catch (Exception e){
-            e.printStackTrace();
-            println(e.getMessage());
-        }finally {
-            try{
-                if(sock!=null){
-                    sock.close();
-                    println(">> 서버와 연결 종료!");
-                }
-            }catch (IOException e){
-                e.printStackTrace();
-                println(e.getMessage());
-            }
-        }
-    }
-    public void println(String str){
-        Message msg=Message.obtain();
-        msg.what=1;
-        msg.obj=str+"\n";
-        mHandler.sendMessage(msg);
-    }
-}
-class SendThread extends Thread{
-    private ClientThread clientThread;
-    private OutputStream outputStream;
-    public static Handler mHandler;
-
-    public SendThread(ClientThread client,OutputStream output){
-        clientThread=client;
-        outputStream=output;
-    }
-
-    @Override
-    public void run() {
-        Log.d("testing","SendThread run");
-
-        Looper.prepare();
-        mHandler=new Handler(){
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                switch (msg.what){
-                    case 1:
-                        // 송신
-                        try{
-                            String s=(String) msg.obj;
-                            outputStream.write(s.getBytes());
-                            clientThread.println("[보낸 데이터]"+s);
-                        }catch (IOException e){
-                            e.printStackTrace();
-                            clientThread.println(e.getMessage());
-                        }
-                        break;
-                    case 2:
-                        // 스레드 종료
-                        getLooper().quit();
-                        break;
-                }
-            }
-        };
-        Looper.loop();
-    }
-}
-class RecvThread extends Thread{
-    private ClientThread clientThread;
-    private InputStream inputStream;
-
-    public RecvThread(ClientThread client, InputStream input){
-        clientThread=client;
-        inputStream = input;
-    }
-
-    @Override
-    public void run() {
-        Log.d("testing","RevThread run");
-        byte[] buf=new byte[1024];
-        while(true){
-            try{
-                int nbytes=inputStream.read(buf);
-                if(nbytes>0){
-                    String s=new String(buf,0,nbytes);
-                    clientThread.println("[받은 데이터]"+s);
-                }
-                else{
-                    clientThread.println(">> 서버가 연결 끊음!");
-                    if(SendThread.mHandler!=null){
-                        Message msg=Message.obtain();
-                        msg.what=2;
-                        SendThread.mHandler.sendMessage(msg);
-                    }
-                    break;
-                }
-            }catch (IOException e){
-                clientThread.println(e.getMessage());
-            }
+                getSupportFragmentManager().beginTransaction().replace(R.id.layout_main, noti).commit();
+                break;
         }
     }
 }

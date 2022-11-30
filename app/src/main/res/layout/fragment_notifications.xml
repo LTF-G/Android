@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:background="#48609B"
     android:backgroundTint="@color/appMainColor"
-    tools:context=".ui.notifications.NotificationsFragment">
+    tools:context=".ui.notifications.NotificationsFragment"
+    android:id="@+id/layout_notification">
 
     <ImageView
         android:id="@+id/imageView"
@@ -63,6 +64,7 @@
         app:layout_constraintTop_toTopOf="@+id/text_notifications" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycleView"
         android:layout_width="409dp"
         android:layout_height="0dp"
         android:layout_marginTop="20dp"
