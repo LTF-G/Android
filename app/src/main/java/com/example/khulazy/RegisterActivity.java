@@ -17,9 +17,25 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
+import com.example.khulazy.ui.notifications.onHTTPConnection;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -60,47 +76,108 @@ public class RegisterActivity extends AppCompatActivity {
                     return;
                 }
 
-                Response.Listener<String> responseListener = new Response.Listener<String>() {
+                Thread th = new Thread(new Runnable() {
                     @Override
-                    public void onResponse(String response) {
-
+                    public void run() {
                         try {
-                            JSONObject jsonObject = new JSONObject( response );
-                            boolean success = jsonObject.getBoolean( "ok" );
-                            Log.d(TAG, "onResponse");
+                            String page = "https://43.201.130.48:8484/auth/register";
+                            URL url = new URL(page);
 
-                            //회원가입 성공시
-                            if(UserPwd.equals(PassCk)) {
-                                if (success) {
+                            ignoreSsl();
+                            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
+                            conn.setRequestProperty("userid", UserId);
+                            conn.setRequestProperty("password", UserPwd);
+                            conn.setRequestProperty("nickname", UserName);
+
+                            final StringBuilder sb = new StringBuilder();
+                            if (conn != null) {
+                                Log.i("tag", "conn 연결");
+                                conn.setRequestProperty("Accept", "application/json");
+                                conn.setConnectTimeout(10000);
+
+                                conn.setRequestMethod("POST");
+
+                                Log.d(TAG, "run: " + conn.getResponseCode());
+                                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                                    BufferedReader br = new BufferedReader(new InputStreamReader(
+                                            conn.getInputStream(), "utf-8"
+                                    ));
+                                    String line;
+                                    while ((line = br.readLine()) != null) {
+                                        sb.append(line);
+                                    }
+                                    // 버퍼리더 종료
+                                    br.close();
+                                    // 응답 Json 타입일 경우
+                                    JSONArray jsonResponse = new JSONArray(sb.toString());
+                                    Log.i("tag", "확인 jsonArray : " + jsonResponse);
+
+                                }
+                                else {
+                                }
+                            }
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
                                     Toast.makeText(getApplicationContext(), String.format("%s님 가입을 환영합니다.", UserName), Toast.LENGTH_SHORT).show();
                                     Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                                     startActivity(intent);
-
-                                    //회원가입 실패시
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "회원가입에 실패하였습니다.", Toast.LENGTH_SHORT).show();
-                                    return;
                                 }
-                            } else {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
-                                dialog = builder.setMessage("비밀번호가 동일하지 않습니다.").setNegativeButton("확인", null).create();
-                                dialog.show();
-                                return;
-                            }
+                            });
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        } catch (Exception e) {
+                            Log.i("tag", "error :" + e);
                         }
-
                     }
-                };
-
-                //서버로 Volley를 이용해서 요청
-                RegisterRequest registerRequest = new RegisterRequest( UserId, UserPwd, UserName, responseListener);
-                RequestQueue queue = Volley.newRequestQueue( RegisterActivity.this );
-                queue.add( registerRequest );
+                });
+                th.start();
             }
+
         });
+    }
+
+    public static void ignoreSsl () throws Exception {
+        HostnameVerifier hv = new HostnameVerifier() {
+            public boolean verify(String urlHostName, SSLSession session) {
+                return true;
+            }
+        };
+        trustAllHttpsCertificates();
+        HttpsURLConnection.setDefaultHostnameVerifier(hv);
+    }
+
+    private static void trustAllHttpsCertificates () throws Exception {
+        TrustManager[] trustAllCerts = new TrustManager[1];
+        TrustManager tm = new RegisterActivity.miTM();
+        trustAllCerts[0] = tm;
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, trustAllCerts, null);
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    }
+
+    static class miTM implements TrustManager, X509TrustManager {
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
+
+        public boolean isServerTrusted(X509Certificate[] certs) {
+            return true;
+        }
+
+        public boolean isClientTrusted(X509Certificate[] certs) {
+            return true;
+        }
+
+        public void checkServerTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            return;
+        }
+
+        public void checkClientTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            return;
+        }
     }
 }

@@ -17,8 +17,23 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -30,8 +45,8 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate( savedInstanceState );
-        setContentView( R.layout.activity_login );
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         editor = preferences.edit();
@@ -39,64 +54,140 @@ public class LoginActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
 
-        login_id = findViewById( R.id.login_id );
-        login_password = findViewById( R.id.login_password );
+        login_id = findViewById(R.id.login_id);
+        login_password = findViewById(R.id.login_password);
 
-        join_button = findViewById( R.id.join_button );
-        join_button.setOnClickListener( new View.OnClickListener() {
+        join_button = findViewById(R.id.join_button);
+        join_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent( LoginActivity.this, RegisterActivity.class );
-                startActivity( intent );
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
             }
         });
 
 
-        login_button = findViewById( R.id.login_button );
-        login_button.setOnClickListener( new View.OnClickListener() {
+        login_button = findViewById(R.id.login_button);
+        login_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String UserId = login_id.getText().toString();
                 String UserPwd = login_password.getText().toString();
 
-                Response.Listener<String> responseListener = new Response.Listener<String>() {
+
+                Thread th = new Thread(new Runnable() {
                     @Override
-                    public void onResponse(String response) {
+                    public void run() {
                         try {
-                            JSONObject jsonObject = new JSONObject( response );
-                            boolean success = jsonObject.getBoolean( "ok" );
-                            Log.d("login", "response: " + jsonObject.getString("accessToken"));
+                            String page = "https://43.201.130.48:8484/auth/login";
+                            URL url = new URL(page);
+                            ignoreSsl();
+                            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-                            if(success) {//로그인 성공시
+                            conn.setRequestProperty("userid", UserId);
+                            conn.setRequestProperty("password", UserPwd);
 
-                                // 토큰 전송
-                                String accessToken = jsonObject.getString( "accessToken" );
-                                String refreshToken = jsonObject.getString( "refreshToken" );
+                            final StringBuilder sb = new StringBuilder();
+                            if (conn != null) {
+                                Log.i("tag", "conn 연결");
 
-                                editor.putString("refreshToken", refreshToken);
-                                editor.putString("accessToken", accessToken);
-                                editor.apply();
+                                conn.setConnectTimeout(10000);
+                                conn.setRequestProperty("Accept", "application/json");
+                                conn.setRequestMethod("POST");
 
-                                Toast.makeText( getApplicationContext(), String.format("%s님 환영합니다.", UserId), Toast.LENGTH_SHORT ).show();
-                                Intent intent = new Intent( LoginActivity.this, MainActivity.class );
+                                Log.d("TAG", "run: " + conn.getResponseCode());
 
-                                startActivity( intent );
+                                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                                    BufferedReader br = new BufferedReader(new InputStreamReader(
+                                            conn.getInputStream(), "utf-8"
+                                    ));
+                                    String line;
+                                    while ((line = br.readLine()) != null) {
+                                        sb.append(line);
+                                    }
+                                    // 버퍼리더 종료
+                                    br.close();
+                                    // 응답 Json 타입일 경우
+                                    JSONArray jsonResponse = new JSONArray(sb.toString());
+                                    Log.i("tag", "확인 jsonArray : " + jsonResponse);
 
-                            } else {//로그인 실패시
-                                Toast.makeText( getApplicationContext(), "로그인에 실패하셨습니다.", Toast.LENGTH_SHORT ).show();
-                                return;
+                                    String accessToken = jsonResponse.getJSONObject(0).getString("accessToken");
+                                    String refreshToken = jsonResponse.getJSONObject(0).getString("refreshToken");
+
+                                    Log.d("tag", "accessToken: " + accessToken);
+                                    Log.d("tag", "refreshToken: " + refreshToken);
+
+                                    editor.putString("refreshToken", refreshToken);
+                                    editor.putString("accessToken", accessToken);
+                                    editor.apply();
+                                }
+                                else {
+
+                                }
+                                // 연결 끊기
+                                conn.disconnect();
                             }
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(), String.format("%s님 환영합니다.", UserId), Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                }
+                            });
+
+                        } catch (Exception e) {
+                            Log.i("tag", "error :" + e);
                         }
                     }
-                };
-                LoginRequest loginRequest = new LoginRequest( UserId, UserPwd, responseListener );
-                RequestQueue queue = Volley.newRequestQueue( LoginActivity.this );
-                queue.add( loginRequest );
+                });
 
+                th.start();
             }
         });
+    }
+
+    public static void ignoreSsl () throws Exception {
+        HostnameVerifier hv = new HostnameVerifier() {
+            public boolean verify(String urlHostName, SSLSession session) {
+                return true;
+            }
+        };
+        trustAllHttpsCertificates();
+        HttpsURLConnection.setDefaultHostnameVerifier(hv);
+    }
+
+    private static void trustAllHttpsCertificates () throws Exception {
+        TrustManager[] trustAllCerts = new TrustManager[1];
+        TrustManager tm = new RegisterActivity.miTM();
+        trustAllCerts[0] = tm;
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, trustAllCerts, null);
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    }
+
+    static class miTM implements TrustManager, X509TrustManager {
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
+
+        public boolean isServerTrusted(X509Certificate[] certs) {
+            return true;
+        }
+
+        public boolean isClientTrusted(X509Certificate[] certs) {
+            return true;
+        }
+
+        public void checkServerTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            return;
+        }
+
+        public void checkClientTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            return;
+        }
     }
 }
