@@ -20,7 +20,8 @@ public class TimePickerActivity extends Fragment implements View.OnClickListener
 
     private View view;
     private Button button;
-    private TimePicker timePicker;
+    private TimePicker timePicker1;
+    private TimePicker timePicker2;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -30,7 +31,8 @@ public class TimePickerActivity extends Fragment implements View.OnClickListener
         button = view.findViewById(R.id.okBtn);
         button.setOnClickListener(this);
 
-        timePicker = (TimePicker)view.findViewById(R.id.time_picker);
+        timePicker1 = (TimePicker)view.findViewById(R.id.time_picker1);
+        timePicker2 = (TimePicker)view.findViewById(R.id.time_picker2);
 
         return view;
     }
@@ -40,7 +42,7 @@ public class TimePickerActivity extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.okBtn:
-                ((MainActivity)getActivity()).replaceFragment(2, timePicker.getHour(), timePicker.getMinute());
+                ((MainActivity)getActivity()).replaceFragment(2, timePicker1.getHour(), timePicker1.getMinute(), timePicker2.getHour(), timePicker2.getMinute());
                 break;
         }
     }

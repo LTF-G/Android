@@ -6,35 +6,40 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TimeActivity {
-    public int hour;
-    public int minute;
+    public int startHour;
+    public int startMinute;
+    public int endHour;
+    public int endMinute;
 
-    public int getHour() {
-        return hour;
+    public int getStartHour() {
+        return startHour;
+    }
+    public int getStartMinute() {
+        return startMinute;
     }
 
-    public void setHour(int hour) {
-        this.hour = hour;
+    public int getEndHour() {
+        return endHour;
+    }
+    public int getEndMinute() {
+        return endMinute;
     }
 
-    public int getMinute() {
-        return minute;
-    }
 
-    public void setMinute(int minute) {
-        this.minute = minute;
-    }
-
-    public TimeActivity(int hour, int minute) {
-        this.hour = hour;
-        this.minute = minute;
+    public TimeActivity(int startHour, int startMinute, int endHour, int endMinute) {
+        this.startHour = startHour;
+        this.startMinute = startMinute;
+        this.endHour = endHour;
+        this.endMinute = endMinute;
     }
 
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer();
-        sb.append("hour = ").append(hour);
-        sb.append(", minute = ").append(minute);
+        sb.append("start hour = ").append(startHour);
+        sb.append(", start minute = ").append(startMinute);
+        sb.append(", end hour = ").append(endHour);
+        sb.append(", end minute = ").append(endMinute);
         return sb.toString();
     }
 }
