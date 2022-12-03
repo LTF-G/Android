@@ -1,10 +1,13 @@
 package com.example.khulazy.ui.dashboard;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -22,14 +25,29 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 
 public class DashboardFragment extends Fragment {
     private View view;
+    private TextView username;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_dashboard, container, false);
+
+        username = view.findViewById(R.id.user_name);
+
+        try {
+            SharedPreferences sharedPreferences = PreferenceManager
+                    .getDefaultSharedPreferences(getContext());
+            String usernames = sharedPreferences.getString("userid", "no name");
+            username.setText(usernames + "님의");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return view;
     }
 

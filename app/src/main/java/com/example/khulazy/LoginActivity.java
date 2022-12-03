@@ -25,8 +25,11 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -74,28 +77,39 @@ public class LoginActivity extends AppCompatActivity {
                 String UserId = login_id.getText().toString();
                 String UserPwd = login_password.getText().toString();
 
-
                 Thread th = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
                             String page = "https://43.201.130.48:8484/auth/login";
                             URL url = new URL(page);
+
+                            Map<String,Object> params = new LinkedHashMap<>();
+                            params.put("userid", UserId);
+                            params.put("password", UserPwd);
+
+                            StringBuilder postData = new StringBuilder();
+                            for(Map.Entry<String,Object> param : params.entrySet()) {
+                                if(postData.length() != 0) postData.append('&');
+                                postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+                                postData.append('=');
+                                postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
+                            }
+                            byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+
                             ignoreSsl();
                             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-                            conn.setRequestProperty("userid", UserId);
-                            conn.setRequestProperty("password", UserPwd);
-
                             final StringBuilder sb = new StringBuilder();
                             if (conn != null) {
-                                Log.i("tag", "conn 연결");
-
                                 conn.setConnectTimeout(10000);
-                                conn.setRequestProperty("Accept", "application/json");
                                 conn.setRequestMethod("POST");
-
-                                Log.d("TAG", "run: " + conn.getResponseCode());
+                                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                                conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+                                conn.setRequestProperty("Accept", "application/json");
+                                conn.setDoOutput(true);
+                                conn.setDoInput(true);
+                                conn.getOutputStream().write(postDataBytes);
 
                                 if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                                     BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -108,41 +122,41 @@ public class LoginActivity extends AppCompatActivity {
                                     // 버퍼리더 종료
                                     br.close();
                                     // 응답 Json 타입일 경우
-                                    JSONArray jsonResponse = new JSONArray(sb.toString());
-                                    Log.i("tag", "확인 jsonArray : " + jsonResponse);
+                                    JSONObject jsonObject = new JSONObject(sb.toString());
+                                    Log.i("tag", "확인 jsonArray : " + jsonObject.getString("message"));
 
-                                    String accessToken = jsonResponse.getJSONObject(0).getString("accessToken");
-                                    String refreshToken = jsonResponse.getJSONObject(0).getString("refreshToken");
+                                    String datas = jsonObject.getString("data");
+                                    JSONObject tokens = new JSONObject(datas);
+                                    String accessToken = tokens.getString("accessToken");
+                                    String refreshToken = tokens.getString("refreshToken");
 
                                     Log.d("tag", "accessToken: " + accessToken);
                                     Log.d("tag", "refreshToken: " + refreshToken);
 
                                     editor.putString("refreshToken", refreshToken);
                                     editor.putString("accessToken", accessToken);
+                                    editor.putString("userid", UserId);
                                     editor.apply();
+
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getApplicationContext(), String.format("%s님 환영합니다.", UserId), Toast.LENGTH_SHORT).show();
+                                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                            startActivity(intent);
+                                        }
+                                    });
+
                                 }
                                 else {
-
                                 }
-                                // 연결 끊기
-                                conn.disconnect();
                             }
-
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(getApplicationContext(), String.format("%s님 환영합니다.", UserId), Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                    startActivity(intent);
-                                }
-                            });
 
                         } catch (Exception e) {
                             Log.i("tag", "error :" + e);
                         }
                     }
                 });
-
                 th.start();
             }
         });

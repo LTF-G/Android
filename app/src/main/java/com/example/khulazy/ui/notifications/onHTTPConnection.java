@@ -50,10 +50,10 @@ public class onHTTPConnection {
 
             result = sb.toString();
 
-            JSONArray jsonResponse = new JSONArray(result);
-            JSONObject jsonObject = jsonResponse.getJSONObject(0);
+            JSONObject jsonObject = new JSONObject(result);
             result = jsonObject.getString("ip");
 
+            Log.d("rpi ip", "GETFunction: " + result);
             return result;
 
         } catch (Exception e) {
