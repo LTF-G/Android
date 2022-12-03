@@ -1,7 +1,9 @@
 package com.example.khulazy;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -23,10 +25,16 @@ public class LoginActivity extends AppCompatActivity {
     private EditText login_id, login_password;
     private Button login_button, join_button;
 
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_login );
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        editor = preferences.edit();
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
@@ -65,12 +73,12 @@ public class LoginActivity extends AppCompatActivity {
                                 String accessToken = jsonObject.getString( "accessToken" );
                                 String refreshToken = jsonObject.getString( "refreshToken" );
 
+                                editor.putString("refreshToken", refreshToken);
+                                editor.putString("accessToken", accessToken);
+                                editor.apply();
+
                                 Toast.makeText( getApplicationContext(), String.format("%s님 환영합니다.", UserId), Toast.LENGTH_SHORT ).show();
                                 Intent intent = new Intent( LoginActivity.this, MainActivity.class );
-
-                                // 토큰 전송
-                                intent.putExtra( "accessToken", accessToken );
-                                intent.putExtra( "refreshToken", refreshToken );
 
                                 startActivity( intent );
 

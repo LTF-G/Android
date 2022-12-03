@@ -1,5 +1,7 @@
 package com.example.khulazy.ui.notifications;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -23,15 +25,15 @@ import javax.net.ssl.X509TrustManager;
 public class onHTTPConnection {
     String EXCEPTION_ERROR = "url 오류 발생";
 
-    public String GETFunction(String mUrl) {
+    public String GETFunction(String mUrl,  String authorization, String refreshToken) {
         try {
             URL url = new URL(mUrl);
             ignoreSsl();
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
-            conn.setRequestProperty("authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFzZCIsImlhdCI6MTY2OTQ5MDg5MCwiZXhwIjoxNjY5NDk4MDkwfQ.TjmeuMwEcnY7str3L2DyEt3QTD6ZSKTK5mBa5Eqxc7Q");
-            conn.setRequestProperty("refresh", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2Njk0OTA4OTAsImV4cCI6MTY3MDcwMDQ5MH0.KTc1GuJZAyYB3lvtZZ4W8XLjnEZh97YL8bNcDSCoxZw");
+            conn.setRequestProperty("authorization", "Bearer " + authorization);
+            conn.setRequestProperty("refresh", "Bearer " + refreshToken);
             conn.setConnectTimeout(15000);
             conn.setReadTimeout(10000);
             conn.setDoInput(true);
