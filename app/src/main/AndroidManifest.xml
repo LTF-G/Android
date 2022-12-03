@@ -12,24 +12,36 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.KHULazy"
         tools:targetApi="31"
-        android:usesCleartextTraffic="true">>
+        android:usesCleartextTraffic="true">
+        
+        <activity android:name=".RegisterActivity"/>
+
 
         <activity android:name=".MainActivity"
             android:theme="@style/SplashTheme"
             android:exported="true"
             android:configChanges="orientation|screenSize|keyboardHidden"
-            android:label="@string/app_name"
-            >
+            android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+
+        <activity android:name=".LoginActivity"/>
+
+        <activity android:name=".SplashActivity"
+            android:theme="@style/SplashTheme"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
+
     <uses-permission android:name="android.permission.INTERNET"/>
 
 </manifest>

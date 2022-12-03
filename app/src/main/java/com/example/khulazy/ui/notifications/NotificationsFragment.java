@@ -28,8 +28,10 @@ public class NotificationsFragment extends Fragment implements View.OnClickListe
     private View view;
     private Button button;
 
-    private int hour;
-    private int minute;
+    private int starHour;
+    private int startMinute;
+    private int endHour;
+    private int endMinute;
 
     RecyclerView recyclerView;
     RecyclerAdapter adapter;
@@ -41,10 +43,13 @@ public class NotificationsFragment extends Fragment implements View.OnClickListe
                              ViewGroup container, Bundle savedInstanceState) {
 
         if (getArguments() != null) {
-            hour = getArguments().getInt("hour");
-            minute = getArguments().getInt("minute");
+            starHour = getArguments().getInt("startHour");
+            startMinute = getArguments().getInt("startMinute");
 
-            TimeActivity t = new TimeActivity(hour, minute);
+            endHour = getArguments().getInt("endHour");
+            endMinute = getArguments().getInt("endMinute");
+
+            TimeActivity t = new TimeActivity(starHour, startMinute, endHour, endMinute);
             listbundle.add(t);
             adapter.notifyDataSetChanged();
         }
@@ -73,7 +78,7 @@ public class NotificationsFragment extends Fragment implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button:
-                ((MainActivity)getActivity()).replaceFragment(1, 0, 0);
+                ((MainActivity)getActivity()).replaceFragment(1, 0, 0, 0, 0);
                 break;
         }
     }

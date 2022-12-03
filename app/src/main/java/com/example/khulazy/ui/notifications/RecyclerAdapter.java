@@ -1,6 +1,7 @@
 package com.example.khulazy.ui.notifications;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,13 +35,15 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.logging.Handler;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
 
+    private ArrayList<TimeActivity> listbundle = new ArrayList<>();
+    Context mContext;
+
     String response; //서버 응답
     String TAG = "socket 응답";
-//    Handler handler = new Handler();
+    Handler handler = new Handler();
     onHTTPConnection httpConnection = new onHTTPConnection();
 
     class SocketThread extends Thread{
@@ -58,6 +61,25 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
         @Override
         public void run() {
+
+            try{
+                int port = 5555; //포트 번호는 서버측과 똑같이
+                Socket socket = new Socket(host, port); // 소켓 열어주기
+                ObjectOutputStream outstream = new ObjectOutputStream(socket.getOutputStream()); //소켓의 출력 스트림 참조
+                outstream.writeObject(data); // 출력 스트림에 데이터 넣기
+                outstream.flush(); // 출력
+
+                ObjectInputStream instream = new ObjectInputStream(socket.getInputStream()); // 소켓의 입력 스트림 참조
+                response = (String) instream.readObject(); // 응답 가져오기
+                Log.d(TAG, "response: " + response);
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(mContext.getApplicationContext(), "서버 응답 : " + response, Toast.LENGTH_LONG).show();
+                    }
+                });
+
             try {
                 int SDK_INT = android.os.Build.VERSION.SDK_INT;
                 if (SDK_INT > 8){
@@ -115,9 +137,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
                 if (checked) {
                     Toast.makeText(mContext, "알람을 설정했습니다.", Toast.LENGTH_SHORT).show();
+
+                    String data = view.findViewById(R.id.starttime) + "/" + view.findViewById(R.id.endtime).toString();
+                    Log.d(TAG, "data: " + data);
+                    SocketThread thread = new SocketThread("hostip", data);
+
                     Log.d(TAG, "data: " + time.getText().toString());
                     String str = "15:15/20:15";
                     SocketThread thread = new SocketThread("https://43.201.130.48:8484/connection", str);
+
                     thread.start();
                 }
 
@@ -136,7 +164,39 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     // recyclerView 자체와 item 데이터셋을 서로 연결해주는 과정
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TimeActivity list = listbundle.get(position);
-        holder.time.setText(list.getHour() + ":" + list.getMinute());
+        String StartTime = "";
+        String EndTme = "";
+
+        if (list.getStartHour() <= 9) {
+            StartTime +=  "0" + list.getStartHour();
+        }
+        else {
+            StartTime += list.getStartHour();
+        }
+        if (list.getStartMinute() <= 9) {
+            StartTime +=  ":0" + list.getStartMinute();
+        }
+        else {
+            StartTime +=  ":" + list.getStartMinute();
+        }
+
+        if (list.getEndHour() <= 9) {
+            EndTme +=  "0" + list.getEndHour();
+        }
+        else {
+            EndTme += list.getEndHour();
+        }
+
+        if (list.getEndMinute() <= 9) {
+            EndTme +=  ":0" + list.getEndMinute();
+        }
+
+        else {
+            EndTme +=  ":" + list.getEndMinute();
+        }
+
+        holder.startTime.setText(StartTime);
+        holder.endTime.setText(EndTme);
     }
 
     @Override
@@ -146,11 +206,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        TextView time;
+        TextView startTime;
+        TextView endTime;
 
         public ViewHolder(@NonNull View view) {
             super(view);
-            time = view.findViewById(R.id.time);
+            startTime = view.findViewById(R.id.starttime);
+            endTime = view.findViewById(R.id.endtime);
         }
     }
 }

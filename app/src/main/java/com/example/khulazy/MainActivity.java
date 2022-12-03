@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         clientThread.start();
     }
 
-    public void replaceFragment(int index, int hour, int minute) {
+    public void replaceFragment(int index, int starHour, int startMinute, int endHour, int endMinute) {
         switch(index) {
             case 1:
                 Log.d(TAG, "replaceFragment: 화면 전환 1");
@@ -100,8 +100,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "replaceFragment: 화면 전환 2");
 
                 Bundle bundle = new Bundle();
-                bundle.putInt("hour", hour);
-                bundle.putInt("minute", minute);
+                bundle.putInt("starHour", starHour);
+                bundle.putInt("startMinute", startMinute);
+
+                bundle.putInt("endHour", endHour);
+                bundle.putInt("endMinute", endMinute);
+
                 noti.setArguments(bundle);
 
                 getSupportFragmentManager().beginTransaction().replace(R.id.layout_main, noti).commit();
