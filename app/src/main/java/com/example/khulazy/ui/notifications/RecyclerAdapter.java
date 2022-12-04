@@ -2,6 +2,7 @@ package com.example.khulazy.ui.notifications;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
@@ -51,17 +52,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     onHTTPConnection httpConnection = new onHTTPConnection();
 
     class SocketThread extends Thread{
-        String server; // 서버 IP
         String data; // 전송 데이터
         String rpi; // 라즈베리 파이 ip
         int port;
         String accessToken;
         String refreshToken;
 
-        public SocketThread(String server, String data, String accessToken, String refreshToken){
-            this.server = server;
+        public SocketThread(String rpi, String data, String accessToken, String refreshToken){
             this.data = data;
-            this.rpi = "192.168.107.161";
+            this.rpi = rpi;
             this.port = 8888;
             this.accessToken = accessToken;
             this.refreshToken = refreshToken;
@@ -75,7 +74,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                     StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                     StrictMode.setThreadPolicy(policy);
                 }
-                rpi = httpConnection.GETFunction(this.server, this.accessToken, this.refreshToken);
+                //rpi = httpConnection.GETFunction(this.server, this.accessToken, this.refreshToken);
                 Socket socket = new Socket(rpi, port); // 소켓 열어주기
 
                 String OutData = data;
@@ -130,15 +129,17 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                     preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                     String refreshToken = preferences.getString("refreshToken", "no token");
                     String accessToken = preferences.getString("accessToken", "no token");
+                    String rpi = preferences.getString("rpi", "127.0.0.1");
 
                     String data = starttime.getText() + "/" + endtime.getText();
-                    SocketThread thread = new SocketThread("https://43.201.130.48:8484/connection", data, accessToken, refreshToken);
+                    SocketThread thread = new SocketThread(rpi, data, accessToken, refreshToken);
                     thread.start();
                 }
 
                 else {
                     Toast.makeText(mContext, "알람을 해제했습니다.", Toast.LENGTH_SHORT).show();
-                    SocketThread thread = new SocketThread("https://43.201.130.48:8484/connection", "cancel", "", "");
+                    String rpi = preferences.getString("rpi", "127.0.0.1");
+                    SocketThread thread = new SocketThread(rpi, "cancel", "", "");
                     thread.start();
                 }
             }
@@ -201,4 +202,5 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         }
     }
 }
+
 

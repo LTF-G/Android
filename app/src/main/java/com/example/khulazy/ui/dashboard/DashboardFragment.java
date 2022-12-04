@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.khulazy.R;
 import com.example.khulazy.databinding.FragmentDashboardBinding;
 import com.example.khulazy.ui.dashboard.DashboardViewModel;
+import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.BarData;
@@ -73,8 +74,6 @@ public class DashboardFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-
-
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
         root = binding.getRoot();
 
@@ -101,6 +100,7 @@ public class DashboardFragment extends Fragment {
         // setting text color.
         barDataSet.setValueTextColor(Color.BLACK);
 
+        barChart.animateY(1500, Easing.EaseOutQuad);
         // setting text size
         barDataSet.setValueTextSize(16f);
         barChart.getDescription().setEnabled(false);
@@ -118,6 +118,7 @@ public class DashboardFragment extends Fragment {
 
         pieChart = root.findViewById(R.id.achievement_rate);
 
+        pieChart.animateY(1500, Easing.EaseOutQuad);
         PieDataSet pieDataSet = new PieDataSet(data1(), "수면 목표 달성률");
         pieDataSet.setColors(colorArray);
         PieData pieData = new PieData(pieDataSet);
@@ -134,10 +135,7 @@ public class DashboardFragment extends Fragment {
         DashboardViewModel dashboardViewModel =
                 new ViewModelProvider(this).get(DashboardViewModel.class);
 
-
-        view = inflater.inflate(R.layout.fragment_dashboard, container, false);
-
-        username = view.findViewById(R.id.user_name);
+        username = root.findViewById(R.id.user_name);
 
         try {
             SharedPreferences sharedPreferences = PreferenceManager
@@ -207,7 +205,7 @@ public class DashboardFragment extends Fragment {
         });
         th.start();
 
-        return view;
+        return root;
     }
 
 

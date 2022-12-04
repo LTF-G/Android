@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.khulazy.MainActivity;
 import com.example.khulazy.R;
-import com.example.khulazy.databinding.FragmentNotificationsBinding;
 
 import java.util.ArrayList;
 

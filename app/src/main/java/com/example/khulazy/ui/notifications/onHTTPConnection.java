@@ -22,39 +22,53 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-public class onHTTPConnection {
+public class onHTTPConnection extends Thread {
     String EXCEPTION_ERROR = "url 오류 발생";
+    String result;
 
-    public String GETFunction(String mUrl,  String authorization, String refreshToken) {
+    @Override
+    public void run() {
+        super.run();
+    }
+
+    public String GETFunction(String mUrl, String authorization, String refreshToken) {
         try {
             URL url = new URL(mUrl);
             ignoreSsl();
-
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("authorization", "Bearer " + authorization);
-            conn.setRequestProperty("refresh", "Bearer " + refreshToken);
-            conn.setConnectTimeout(15000);
-            conn.setReadTimeout(10000);
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
+            final StringBuilder sb = new StringBuilder();
 
-            InputStream is = conn.getInputStream();
-            StringBuilder sb = new StringBuilder();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-            String result;
-            while ((result = br.readLine()) != null) {
-                sb.append(result);
+            if (conn != null) {
+                conn.setConnectTimeout(10000);
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("authorization", "Bearer " + authorization);
+                conn.setRequestProperty("refresh", "Bearer " + refreshToken);
+                conn.setDoInput(true);
+                conn.connect();
             }
-            br.close();
 
-            result = sb.toString();
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(
+                        conn.getInputStream(), "utf-8"
+                ));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+                // 버퍼리더 종료
+                br.close();
+                // 응답 Json 타입일 경우
 
-            JSONObject jsonObject = new JSONObject(result);
-            result = jsonObject.getString("ip");
+                JSONObject jsonObject = new JSONObject(sb.toString());
+                result = jsonObject.getString("ip");
 
-            Log.d("rpi ip", "GETFunction: " + result);
-            return result;
+                Log.d("rpi ip", "GETFunction: " + result);
+                return result;
+            }
+            else {
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
