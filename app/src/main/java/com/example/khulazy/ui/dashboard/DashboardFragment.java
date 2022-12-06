@@ -188,7 +188,6 @@ public class DashboardFragment extends Fragment {
                             br.close();
                             // 응답 Json 타입일 경우
                             JSONObject jsonObject = new JSONObject(sb.toString());
-                            Log.i("tag", "확인 jsonArray : " + jsonObject.getString("message"));
 
                             JSONArray statistic = jsonObject.getJSONArray("sleepstats");
 //                            Log.d("test", statistic.toString());
@@ -199,6 +198,7 @@ public class DashboardFragment extends Fragment {
                                     getBarEntries(i, (float) obj.getInt("actual_sleep")/3600000);
                                 }
                             }
+
 
 
                         } else {
@@ -301,12 +301,7 @@ public class DashboardFragment extends Fragment {
         datavalue.add(new PieEntry(7));
         datavalue.add(new PieEntry(1));
 
-
         return datavalue;
     }
-
-
-
-
 }
 
