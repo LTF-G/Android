@@ -28,6 +28,7 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -187,13 +188,11 @@ public class DashboardFragment extends Fragment {
                             br.close();
                             // 응답 Json 타입일 경우
                             JSONObject jsonObject = new JSONObject(sb.toString());
-                            Log.i("tag", "확인 jsonArray : " + jsonObject.getString("message"));
 
-                            String statistic = jsonObject.getString("sleepstats");
-                            JSONObject sleepdata = new JSONObject(statistic);
+                            JSONArray jsonarr = new JSONArray(jsonObject.getString("sleepstats"));
+                            Log.i("tag", "확인 jsonArray : " + jsonarr);
 
-                            Log.d("TAG", "시작 시간: " + sleepdata.getString("sleep_start"));
-                            Log.d("TAG", "종료 시간: " + sleepdata.getString("sleep_stop"));
+
                         } else {
                         }
                     }
@@ -279,12 +278,7 @@ public class DashboardFragment extends Fragment {
         datavalue.add(new PieEntry(7));
         datavalue.add(new PieEntry(1));
 
-
         return datavalue;
     }
-
-
-
-
 }
 

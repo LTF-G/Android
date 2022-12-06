@@ -74,25 +74,24 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                     StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                     StrictMode.setThreadPolicy(policy);
                 }
-                //rpi = httpConnection.GETFunction(this.server, this.accessToken, this.refreshToken);
                 Socket socket = new Socket(rpi, port); // 소켓 열어주기
 
                 String OutData = data;
-                byte[] data = OutData.getBytes();
+                byte[] datas = OutData.getBytes();
                 OutputStream output = socket.getOutputStream();
-                output.write(data);
-                Log.d(TAG, "데이터 보냄" + data);
-
-                while(true) {
-                    ObjectInputStream instream = new ObjectInputStream(socket.getInputStream()); // 소켓의 입력 스트림 참조
-                    response = (String) instream.readObject(); // 응답 가져오기
-                    Log.d(TAG, "response: " + response);
-
-                    response = "stop";
-                    if (response == "stop") {
-                        break;
-                    }
-                }
+                output.write(datas);
+                Log.d(TAG, "데이터 보냄" + datas);
+//
+//                while(true) {
+//                    ObjectInputStream instream = new ObjectInputStream(socket.getInputStream()); // 소켓의 입력 스트림 참조
+//                    response = (String) instream.readObject(); // 응답 가져오기
+//                    Log.d(TAG, "response: " + response);
+//
+//                    response = "stop";
+//                    if (response == "stop") {
+//                        break;
+//                    }
+//                }
 
                 Log.d(TAG, "소켓 닫음");
                 socket.close(); // 소켓 해제
@@ -138,9 +137,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
                 else {
                     Toast.makeText(mContext, "알람을 해제했습니다.", Toast.LENGTH_SHORT).show();
-                    String rpi = preferences.getString("rpi", "127.0.0.1");
-                    SocketThread thread = new SocketThread(rpi, "cancel", "", "");
-                    thread.start();
                 }
             }
         });
@@ -160,6 +156,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         else {
             StartTime += list.getStartHour();
         }
+
         if (list.getStartMinute() <= 9) {
             StartTime +=  ":0" + list.getStartMinute();
         }
@@ -182,6 +179,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             EndTme +=  ":" + list.getEndMinute();
         }
 
+        Log.d(TAG, "onBindViewHolder: " + StartTime);
         holder.startTime.setText(StartTime);
         holder.endTime.setText(EndTme);
     }
