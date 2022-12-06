@@ -26,6 +26,7 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import org.json.JSONArray;
@@ -67,7 +68,7 @@ public class DashboardFragment extends Fragment {
     BarDataSet barDataSet;
 
     // array list for storing entries.
-    ArrayList barEntriesArrayList;
+    ArrayList barEntriesArrayList = new ArrayList<>();;
 
     // pie chart
     PieChart pieChart;
@@ -82,7 +83,6 @@ public class DashboardFragment extends Fragment {
         barChart = root.findViewById(R.id.actual_sleep_time);
 
         // calling method to get bar entries.
-        getBarEntries();
 
         // creating a new bar data set.
         barDataSet = new BarDataSet(barEntriesArrayList, "Geeks for Geeks");
@@ -189,20 +189,33 @@ public class DashboardFragment extends Fragment {
                             // 응답 Json 타입일 경우
                             JSONObject jsonObject = new JSONObject(sb.toString());
 
-                            JSONArray jsonarr = new JSONArray(jsonObject.getString("sleepstats"));
-                            Log.i("tag", "확인 jsonArray : " + jsonarr);
+                            JSONArray statistic = jsonObject.getJSONArray("sleepstats");
+//                            Log.d("test", statistic.toString());
+
+                            if (statistic.length() > 0) {
+                                for (int i = 0; i < statistic.length(); i++) {
+                                    JSONObject obj = statistic.getJSONObject(i);
+                                    getBarEntries(i, (float) obj.getInt("actual_sleep")/3600000);
+                                }
+                            }
+
 
 
                         } else {
                         }
+
+
                     }
 
                 } catch (Exception e) {
                     Log.i("tag", "error :" + e);
                 }
             }
+
         });
         th.start();
+
+
 
         return root;
     }
@@ -257,18 +270,28 @@ public class DashboardFragment extends Fragment {
         }
     }
 
-    private void getBarEntries() {
+    private void getBarEntries(int i,float j) {
         // creating a new array list
-        barEntriesArrayList = new ArrayList<>();
+
 
         // adding new entry to our array list with bar
         // entry and passing x and y axis value to it.
-        barEntriesArrayList.add(new BarEntry(1f, 4));
-        barEntriesArrayList.add(new BarEntry(2f, 3));
-        barEntriesArrayList.add(new BarEntry(3f, 1));
-        barEntriesArrayList.add(new BarEntry(4f, 2));
-        barEntriesArrayList.add(new BarEntry(5f, 4));
-        barEntriesArrayList.add(new BarEntry(6f, 1));
+
+        float temp = (float) (Math.round(j*10)/10.0);
+
+        barEntriesArrayList.add(new BarEntry(i,j));
+    //    barEntriesArrayList.add(new BarEntry(x, a));
+
+        barDataSet = new BarDataSet(barEntriesArrayList, "Geeks for Geeks");
+        barDataSet.setValueFormatter(new MyValueFormatter());
+
+        // creating a new bar data and
+        // passing our bar data set.
+        barData = new BarData(barDataSet);
+
+        // below line is to set data
+        // to our bar chart.
+        barChart.setData(barData);
 
     }
 
