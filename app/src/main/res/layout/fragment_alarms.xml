@@ -6,8 +6,8 @@
     android:layout_height="match_parent"
     android:background="#48609B"
     android:backgroundTint="@color/appMainColor"
-    tools:context=".ui.Alarm.AlarmFragment"
-    android:id="@+id/layout_alarm">
+    tools:context=".ui.notifications.NotificationsFragment"
+    android:id="@+id/layout_notification">
 
     <ImageView
         android:id="@+id/imageView"
@@ -39,7 +39,7 @@
         android:layout_marginTop="50dp"
         android:layout_marginEnd="8dp"
         android:fontFamily="@font/poppinssemibold"
-        android:text="  접근 금지 시간 설정"
+        android:text="  기상 알람 설정"
         android:textAlignment="textStart"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="20sp"

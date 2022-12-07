@@ -1,28 +1,24 @@
-package com.example.khulazy.ui.notifications;
+package com.example.khulazy.ui.Alarm;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.khulazy.MainActivity;
 import com.example.khulazy.R;
+import com.example.khulazy.ui.notifications.RecyclerAdapter;
+import com.example.khulazy.ui.notifications.TimeActivity;
 
 import java.util.ArrayList;
 
-public class NotificationsFragment extends Fragment implements View.OnClickListener {
+public class AlarmFragment extends Fragment implements View.OnClickListener {
 
     private View view;
     private Button button;
@@ -33,7 +29,7 @@ public class NotificationsFragment extends Fragment implements View.OnClickListe
     private int endMinute;
 
     RecyclerView recyclerView;
-    RecyclerAdapter adapter;
+    RecyclerAdapter2 adapter;
     RecyclerView.LayoutManager layoutManager;
 
     private ArrayList<TimeActivity> listbundle = new ArrayList<>();
@@ -45,15 +41,12 @@ public class NotificationsFragment extends Fragment implements View.OnClickListe
             starHour = getArguments().getInt("startHour");
             startMinute = getArguments().getInt("startMinute");
 
-            endHour = getArguments().getInt("endHour");
-            endMinute = getArguments().getInt("endMinute");
-
-            TimeActivity t = new TimeActivity(starHour, startMinute, endHour, endMinute);
+            TimeActivity t = new TimeActivity(starHour, startMinute, 0, 0);
             listbundle.add(t);
             adapter.notifyDataSetChanged();
             setArguments(null);
         }
-        view = inflater.inflate(R.layout.fragment_notifications, container, false);
+        view = inflater.inflate(R.layout.fragment_alarms, container, false);
 
         // 리스너 등록
         button = view.findViewById(R.id.button);
@@ -68,7 +61,7 @@ public class NotificationsFragment extends Fragment implements View.OnClickListe
         ((LinearLayoutManager) layoutManager).setStackFromEnd(true);
 
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new RecyclerAdapter(listbundle);
+        adapter = new RecyclerAdapter2(listbundle);
         recyclerView.setAdapter(adapter);
 
         return view;
@@ -78,7 +71,7 @@ public class NotificationsFragment extends Fragment implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button:
-                ((MainActivity)getActivity()).replaceFragment(1, 0, 0, 0, 0);
+                ((MainActivity)getActivity()).replaceFragment(4, 0, 0, 0, 0);
                 break;
         }
     }

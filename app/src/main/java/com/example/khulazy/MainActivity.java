@@ -7,6 +7,9 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
+
+import com.example.khulazy.ui.Alarm.AlarmFragment;
+import com.example.khulazy.ui.Alarm.TimePickerActivity2;
 import com.example.khulazy.ui.dashboard.DashboardFragment;
 import com.example.khulazy.ui.home.HomeFragment;
 import com.example.khulazy.ui.notifications.NotificationsFragment;
@@ -52,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
     Fragment dashboard;
     Fragment noti;
     Fragment timepicker;
+    Fragment timepicker2;
+    Fragment Alarm;
 
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
@@ -70,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
         dashboard = new DashboardFragment();
         noti = new NotificationsFragment();
         timepicker = new TimePickerActivity();
+        timepicker2 = new TimePickerActivity2();
+        Alarm = new AlarmFragment();
 
         // 초기 플래그먼트 설정
         getSupportFragmentManager().beginTransaction().replace(R.id.layout_main, home).commit();
@@ -143,6 +150,9 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.navigation_notifications:
                         getSupportFragmentManager().beginTransaction().replace(R.id.layout_main, noti).commit();
                         return true;
+                    case R.id.navigation_alarm:
+                        getSupportFragmentManager().beginTransaction().replace(R.id.layout_main, Alarm).commit();
+                        return true;
                 }
                 return true;
             }
@@ -187,6 +197,25 @@ public class MainActivity extends AppCompatActivity {
                 noti.setArguments(bundle);
 
                 getSupportFragmentManager().beginTransaction().replace(R.id.layout_main, noti).commit();
+                break;
+            case 3:
+                Log.d(TAG, "replaceFragment: 화면 전환 2");
+
+                Bundle bundles = new Bundle();
+
+                bundles.putInt("startHour", startHour);
+                bundles.putInt("startMinute", startMinute);
+
+                bundles.putInt("endHour", endHour);
+                bundles.putInt("endMinute", endMinute);
+
+                Alarm.setArguments(bundles);
+
+                getSupportFragmentManager().beginTransaction().replace(R.id.layout_main, Alarm).commit();
+                break;
+            case 4:
+                Log.d(TAG, "replaceFragment: 화면 전환 1");
+                getSupportFragmentManager().beginTransaction().replace(R.id.layout_main, timepicker2).commit();
                 break;
         }
     }
