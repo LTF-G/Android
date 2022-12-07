@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
         clientThread.start();
     }
 
-    public void replaceFragment(int index, int starHour, int startMinute, int endHour, int endMinute) {
+    public void replaceFragment(int index, int startHour, int startMinute, int endHour, int endMinute) {
         switch(index) {
             case 1:
                 Log.d(TAG, "replaceFragment: 화면 전환 1");
@@ -177,7 +177,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "replaceFragment: 화면 전환 2");
 
                 Bundle bundle = new Bundle();
-                bundle.putInt("starHour", starHour);
+
+                bundle.putInt("startHour", startHour);
                 bundle.putInt("startMinute", startMinute);
 
                 bundle.putInt("endHour", endHour);

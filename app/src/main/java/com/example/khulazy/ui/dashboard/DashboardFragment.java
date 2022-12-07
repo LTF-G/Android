@@ -1,5 +1,7 @@
 package com.example.khulazy.ui.dashboard;
 
+import static android.icu.number.NumberRangeFormatter.RangeIdentityFallback.RANGE;
+
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -14,22 +16,31 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.khulazy.MainActivity;
 import com.example.khulazy.R;
 import com.example.khulazy.databinding.FragmentDashboardBinding;
 import com.example.khulazy.ui.dashboard.DashboardViewModel;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -70,6 +81,8 @@ public class DashboardFragment extends Fragment {
     // array list for storing entries.
     ArrayList barEntriesArrayList = new ArrayList<>();;
 
+    LineChart lineChart;
+
     // pie chart
     PieChart pieChart;
     int[] colorArray = new int[]{Color.LTGRAY, Color.GRAY};
@@ -82,6 +95,7 @@ public class DashboardFragment extends Fragment {
         // initializing variable for bar chart.
         barChart = root.findViewById(R.id.actual_sleep_time);
 
+        lineChart = root.findViewById(R.id.tossturn);
         // calling method to get bar entries.
 
         // creating a new bar data set.
@@ -99,7 +113,7 @@ public class DashboardFragment extends Fragment {
         barDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
 
         // setting text color.
-        barDataSet.setValueTextColor(Color.BLACK);
+        barDataSet.setValueTextColor(Color.DKGRAY);
 
         barChart.animateY(1500, Easing.EaseOutQuad);
         // setting text size
@@ -115,26 +129,68 @@ public class DashboardFragment extends Fragment {
         barChart.getAxisRight().setDrawAxisLine(false);
         barChart.getXAxis().setDrawAxisLine(false);
         barChart.getAxisLeft().setDrawAxisLine(false);
+        barData.setValueTextSize(20);
+        barChart.getXAxis().setAxisLineColor(Color.YELLOW);
+        barChart.getAxisLeft().setAxisLineColor(Color.YELLOW);
+        barDataSet.setColor(Color.parseColor("#FFAB40"));
 
 
         pieChart = root.findViewById(R.id.achievement_rate);
 
         pieChart.animateY(1500, Easing.EaseOutQuad);
-        PieDataSet pieDataSet = new PieDataSet(data1(), "수면 목표 달성률");
+        PieDataSet pieDataSet = new PieDataSet(data1(7, 1), "수면 목표 달성률");
         pieDataSet.setColors(colorArray);
         PieData pieData = new PieData(pieDataSet);
         pieChart.setDrawEntryLabels(true);
         pieChart.setUsePercentValues(true);
-        pieData.setValueTextSize(0);
+        pieData.setValueTextSize(20);
+        pieData.setValueTextColor(Color.DKGRAY);
+        pieChart.setCenterTextSize(20);
+        pieChart.setEntryLabelTextSize(16);
         pieChart.setHoleRadius(60);
         pieChart.setHoleColor(Color.parseColor("#EEF0F5"));
         pieChart.setData(pieData);
         pieChart.invalidate();
         pieChart.getDescription().setEnabled(false);
         pieChart.getLegend().setEnabled(false);
-        pieChart.setCenterText("12.5%");
         DashboardViewModel dashboardViewModel =
                 new ViewModelProvider(this).get(DashboardViewModel.class);
+
+        lineChart.setExtraBottomOffset(15f); // 간격
+        lineChart.getDescription().setEnabled(false);
+        setLineChartData(true);
+        lineChart.animateY(1800, Easing.EaseOutQuad);
+        // XAxis (아래쪽) - 선 유무, 사이즈, 색상, 축 위치 설정
+        XAxis xAxis = lineChart.getXAxis();
+        lineChart.getLegend().setTextColor(Color.DKGRAY);
+        lineChart.getLegend().setTextSize(12);
+        xAxis.setDrawAxisLine(false);
+        xAxis.setDrawGridLines(false);
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM); // x축 데이터 표시 위치
+        xAxis.setGranularity(1f);
+        xAxis.setTextSize(14f);
+        xAxis.setTextColor(Color.rgb(118, 118, 118));
+        xAxis.setSpaceMin(0.1f); // Chart 맨 왼쪽 간격 띄우기
+        xAxis.setSpaceMax(0.1f); // Chart 맨 오른쪽 간격 띄우기
+
+        // YAxis(Right) (왼쪽) - 선 유무, 데이터 최솟값/최댓값, 색상
+        YAxis yAxisLeft = lineChart.getAxisLeft();
+        yAxisLeft.setTextSize(14f);
+        yAxisLeft.setTextColor(Color.rgb(163, 163, 163));
+        yAxisLeft.setDrawAxisLine(false);
+        yAxisLeft.setAxisLineWidth(2);
+        yAxisLeft.setAxisMinimum(0f); // 최솟값
+        yAxisLeft.setAxisMaximum((float) 10); // 최댓값
+        yAxisLeft.setGranularity((float) 10);
+
+        YAxis yAxis = lineChart.getAxisRight();
+        yAxis.setDrawLabels(false); // label 삭제
+        yAxis.setTextColor(Color.rgb(163, 163, 163));
+        yAxis.setDrawAxisLine(false);
+        yAxis.setAxisLineWidth(2);
+        yAxis.setAxisMinimum(0f); // 최솟값
+        yAxis.setAxisMaximum((float) 10); // 최댓값
+        yAxis.setGranularity((float) 10);
 
         username = root.findViewById(R.id.user_name);
 
@@ -195,8 +251,37 @@ public class DashboardFragment extends Fragment {
                             if (statistic.length() > 0) {
                                 for (int i = 0; i < statistic.length(); i++) {
                                     JSONObject obj = statistic.getJSONObject(i);
-                                    getBarEntries(i, (float) obj.getInt("actual_sleep")/3600000);
+                                    final int index = i;
+                                    final int j = (Integer) obj.getInt("actual_sleep")/3600000;
+                                   getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            getBarEntries(index, j);
+                                        }
+                                    });
                                 }
+
+                                JSONObject obj = statistic.getJSONObject(0);
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        int value1 = 1;
+                                        try {
+                                            value1 = (Integer) obj.getInt("actual_sleep")/3600000;
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                        PieDataSet pieDataSet = new PieDataSet(data1(8, value1), "수면 목표 달성률");
+
+                                        float percent = (float) (value1 / 8.0) * 100;
+                                        pieChart.setCenterText(percent + "%");
+                                        pieDataSet.setColors(colorArray);
+                                        pieDataSet.setColors(Color.parseColor("#FFAB40"), Color.DKGRAY);
+                                        PieData pieData = new PieData(pieDataSet);
+                                        pieChart.setData(pieData);
+                                        pieChart.notifyDataSetChanged();
+                                    }
+                                });
                             }
 
 
@@ -288,6 +373,9 @@ public class DashboardFragment extends Fragment {
         // creating a new bar data and
         // passing our bar data set.
         barData = new BarData(barDataSet);
+        barData.setValueTextSize(13);
+        barData.setValueTextColor(Color.DKGRAY);
+        barDataSet.setColor(Color.parseColor("#FFAB40"));
 
         // below line is to set data
         // to our bar chart.
@@ -295,13 +383,36 @@ public class DashboardFragment extends Fragment {
 
     }
 
-    private ArrayList<PieEntry> data1() {
+    private ArrayList<PieEntry> data1(int value1, int value2) {
         ArrayList<PieEntry> datavalue = new ArrayList<>();
 
-        datavalue.add(new PieEntry(7));
-        datavalue.add(new PieEntry(1));
+        datavalue.add(new PieEntry(value1));
+        datavalue.add(new PieEntry(value2));
 
         return datavalue;
+    }
+
+    private void setLineChartData(boolean exists) {
+        ArrayList<Entry> entry1 = new ArrayList<>();
+        for(int i = 0;i < 7;i++) {
+            int val = (int) (Math.random() * 10);
+            entry1.add(new Entry(i + 1, val));
+        }
+
+        LineDataSet set1;
+        set1 = new LineDataSet(entry1, "뒤척임 수");
+        set1.setCircleColor(Color.parseColor("#FFAB40"));
+        set1.setLineWidth(2);
+        set1.setColor(Color.DKGRAY);
+        set1.setDrawValues(false);
+        set1.setCircleHoleColor(Color.parseColor("#FFAB40"));
+
+        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
+        dataSets.add(set1);
+
+        LineData data = new LineData(dataSets);
+        lineChart.setData(data); // LineData 전달
+        lineChart.invalidate();
     }
 }
 

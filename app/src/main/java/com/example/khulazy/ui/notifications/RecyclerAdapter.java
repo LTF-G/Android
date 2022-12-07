@@ -149,6 +149,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         TimeActivity list = listbundle.get(position);
         String StartTime = "";
         String EndTme = "";
+        Log.d(TAG, "onBindViewHolder: " + list.getStartHour());
 
         if (list.getStartHour() <= 9) {
             StartTime +=  "0" + list.getStartHour();

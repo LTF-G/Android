@@ -1,6 +1,7 @@
 package com.example.khulazy.ui.notifications;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,7 @@ public class TimePickerActivity extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.okBtn:
+                Log.d("TAG", "onClick: " + timePicker1.getHour());
                 ((MainActivity)getActivity()).replaceFragment(2, timePicker1.getHour(), timePicker1.getMinute(), timePicker2.getHour(), timePicker2.getMinute());
                 break;
         }
